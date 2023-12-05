@@ -1,3 +1,5 @@
+import "./globals.css";
+
 import type { AppType } from "next/app";
 import { trpc } from "@/utils/ws-trpc";
 

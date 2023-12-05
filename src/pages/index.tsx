@@ -1,21 +1,68 @@
-import { trpc } from "@/utils/trpc";
+import { trpc } from "@/utils/ws-trpc";
 
-import { trpc as wsClient } from "@/utils/trpc";
+import { v4 as uuidv4 } from "uuid";
+
+import { Message } from "@/server";
+
+import { useState } from "react";
 
 export default function IndexPage() {
-  const hello = trpc.hello.useQuery({ text: "pablo" });
+  const [user, setUser] = useState("");
+  const [message, setMessage] = useState("");
+  const [messageList, setMessageList] = useState<Message[]>([]);
 
-  const wsHello = wsClient.sendMessage.useMutation({
-    id: "user1",
-    text: "pablo",
+  const addMessageToList = (message: Message) => {
+    setMessageList([...messageList, message]);
+  };
+
+  const addMessage = trpc.sendMessage.useMutation();
+
+  trpc.onSend.useSubscription(undefined, {
+    onData(message) {
+      // agrego un mensaje a la lista
+      console.log({ fn: "onData", message });
+      if (message.user !== user) {
+        addMessageToList(message);
+      }
+      // addMessages([message]);
+    },
+    onError(err) {
+      console.error("Subscription error:", err);
+    },
   });
 
-  if (!hello.data) {
-    return <div>Loading...</div>;
-  }
+  const send = () => {
+    const messageObj = {
+      id: uuidv4(),
+      user,
+      text: message,
+    };
+
+    addMessageToList(messageObj);
+
+    addMessage.mutateAsync(messageObj);
+  };
+
   return (
-    <div className="bg-black">
-      <p>{hello.data.greeting}</p>
+    <div>
+      <input type="text" onChange={(evt) => setUser(evt.target.value)} />
+      <ul>
+        {messageList.map((message) => (
+          <li
+            key={message.id}
+            className={message.user === user ? " text-red-500" : ""}
+          >
+            {message.text} by {message.user}
+          </li>
+        ))}
+      </ul>
+      <input
+        type="text"
+        name=""
+        id=""
+        onChange={(evt) => setMessage(evt.target.value)}
+      />
+      <button onClick={send}>send message</button>
     </div>
   );
 }

@@ -3,17 +3,19 @@ import { EventEmitter } from "events";
 import { observable } from "@trpc/server/observable";
 import { procedure, router } from "@/server/trpc";
 
-interface Message {
-  emitter: string;
+export interface Message {
+  id: string;
+  user: string;
   text: string;
 }
 
 const ee = new EventEmitter();
 
 export const appRouter = router({
-  testWs: procedure.subscription(() => {
+  onSend: procedure.subscription(() => {
     return observable<Message>((emit) => {
       const onAdd = (data: Message) => {
+        console.log({ fn: 'onAdd', data})
         // emit data to client
         emit.next(data);
       };
@@ -28,27 +30,17 @@ export const appRouter = router({
   sendMessage: procedure
     .input(
       z.object({
-        id: z.string().uuid().optional(),
+        id: z.string().uuid(),
+        user: z.string().min(3),
         text: z.string().min(1),
       })
     )
     .mutation(async (opts) => {
-      const message = { ...opts.input }; /* [..] add to db */
+      const message = { ...opts.input };
+      /* [..] add to db */
       ee.emit("message", message);
       return message;
-    }),
-
-  hello: procedure
-    .input(
-      z.object({
-        text: z.string(),
-      })
-    )
-    .query((opts) => {
-      return {
-        greeting: `hello ${opts.input.text}`,
-      };
-    }),
+    })
 });
 // export type definition of API
 export type AppRouter = typeof appRouter;
