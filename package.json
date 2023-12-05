@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:wss": "tsx watch src/server/wsServer.ts",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -17,12 +18,15 @@
     "next": "14.0.3",
     "react": "^18",
     "react-dom": "^18",
+    "tsx": "^4.6.2",
+    "ws": "^8.14.2",
     "zod": "^3.22.4"
   },
   "devDependencies": {
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@types/ws": "^8.5.10",
     "autoprefixer": "^10.0.1",
     "postcss": "^8",
     "tailwindcss": "^3.3.0",
