@@ -12,13 +12,13 @@ export default function IndexPage() {
   const [message, setMessage] = useState("");
   const [messageList, setMessageList] = useState<Message[]>([]);
 
-  const messages = trpc.fetchMessages.useQuery();
+  const { data, error, isLoading } = trpc.fetchMessages.useQuery();
 
   useEffect(() => {
-    if (messages.data) {
-      setMessageList(messages.data);
+    if (data) {
+      setMessageList(data);
     }
-  }, [messages.data]);
+  }, [data]);
 
   const addMessageToList = (message: Message) => {
     setMessageList([...messageList, message]);
@@ -49,16 +49,21 @@ export default function IndexPage() {
     addMessage.mutateAsync(messageObj);
   };
 
+  if (error) return <div>{error.message}</div>;
+
+  if (isLoading) return <div>Loading...</div>;
+
   return (
     <div>
       <input type="text" onChange={(evt) => setUser(evt.target.value)} />
+
       <div className="flex flex-col max-w-[300px]">
         {messageList.map((message) => (
           <ChatMessage
             key={message.id}
             isYou={message.user === user}
             message={message}
-          ></ChatMessage>
+          />
         ))}
       </div>
       <input
