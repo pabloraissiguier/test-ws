@@ -2,6 +2,7 @@ import { z } from "zod";
 import { EventEmitter } from "events";
 import { observable } from "@trpc/server/observable";
 import { procedure, router } from "@/server/trpc";
+import { getMessages, storeMessage } from "@/utils/mongodb";
 
 export interface Message {
   id: string;
@@ -15,8 +16,6 @@ export const appRouter = router({
   onSend: procedure.subscription(() => {
     return observable<Message>((emit) => {
       const onAdd = (data: Message) => {
-        console.log({ fn: 'onAdd', data})
-        // emit data to client
         emit.next(data);
       };
       ee.on("message", onAdd);
@@ -27,6 +26,12 @@ export const appRouter = router({
     });
   }),
 
+  fetchMessages: procedure.query(async () => {
+    // Replace this with your MongoDB client code to fetch messages
+    const messages = await getMessages();
+    return messages;
+  }),
+
   sendMessage: procedure
     .input(
       z.object({
@@ -35,12 +40,12 @@ export const appRouter = router({
         text: z.string().min(1),
       })
     )
-    .mutation(async (opts) => {
-      const message = { ...opts.input };
-      /* [..] add to db */
+    .mutation(async ({ input }) => {
+      const message = { ...input };
+      await storeMessage(message);
       ee.emit("message", message);
       return message;
-    })
+    }),
 });
 // export type definition of API
 export type AppRouter = typeof appRouter;

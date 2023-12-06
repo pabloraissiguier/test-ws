@@ -4,12 +4,21 @@ import { v4 as uuidv4 } from "uuid";
 
 import { Message } from "@/server";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import ChatMessage from "@/components/ChatMessage";
 
 export default function IndexPage() {
   const [user, setUser] = useState("");
   const [message, setMessage] = useState("");
   const [messageList, setMessageList] = useState<Message[]>([]);
+
+  const messages = trpc.fetchMessages.useQuery();
+
+  useEffect(() => {
+    if (messages.data) {
+      setMessageList(messages.data);
+    }
+  }, [messages.data]);
 
   const addMessageToList = (message: Message) => {
     setMessageList([...messageList, message]);
@@ -19,12 +28,9 @@ export default function IndexPage() {
 
   trpc.onSend.useSubscription(undefined, {
     onData(message) {
-      // agrego un mensaje a la lista
-      console.log({ fn: "onData", message });
       if (message.user !== user) {
         addMessageToList(message);
       }
-      // addMessages([message]);
     },
     onError(err) {
       console.error("Subscription error:", err);
@@ -46,16 +52,15 @@ export default function IndexPage() {
   return (
     <div>
       <input type="text" onChange={(evt) => setUser(evt.target.value)} />
-      <ul>
+      <div className="flex flex-col max-w-[300px]">
         {messageList.map((message) => (
-          <li
+          <ChatMessage
             key={message.id}
-            className={message.user === user ? " text-red-500" : ""}
-          >
-            {message.text} by {message.user}
-          </li>
+            isYou={message.user === user}
+            message={message}
+          ></ChatMessage>
         ))}
-      </ul>
+      </div>
       <input
         type="text"
         name=""
