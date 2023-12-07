@@ -1,4 +1,4 @@
-import { Message } from "@/server";
+import { Message } from "@/utils/types";
 import React from "react";
 
 interface ChatMessageProps {

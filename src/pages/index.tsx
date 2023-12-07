@@ -2,7 +2,7 @@ import { trpc } from "@/utils/ws-trpc";
 
 import { v4 as uuidv4 } from "uuid";
 
-import { Message } from "@/server";
+import { Message } from "@/utils/types";
 
 import { useEffect, useState } from "react";
 import ChatMessage from "@/components/ChatMessage";

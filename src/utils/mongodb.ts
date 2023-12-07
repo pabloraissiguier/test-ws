@@ -1,4 +1,4 @@
-import { Message } from "@/server";
+import { Message } from "@/utils/types";
 import { MongoClient } from "mongodb";
 
 // Connection URI for MongoDB Atlas
@@ -32,7 +32,7 @@ export async function getMessages(): Promise<Message[]> {
 export async function storeMessage(message: Message) {
   // Create a new MongoClient
   const client = new MongoClient(uri);
-  
+
   try {
     // Connect to the MongoDB Atlas cluster
     await client.connect();
