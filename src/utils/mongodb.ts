@@ -2,13 +2,12 @@ import { Message } from "@/server";
 import { MongoClient } from "mongodb";
 
 // Connection URI for MongoDB Atlas
-const uri =
-  "mongodb+srv://pablo:PPNyp21EM6zjHlik@nextchatcluster.1fqlfvd.mongodb.net/?retryWrites=true&w=majority";
-
-// Create a new MongoClient
-const client = new MongoClient(uri);
+const uri = process.env.MONGODB_URI as string;
 
 export async function getMessages(): Promise<Message[]> {
+  // Create a new MongoClient
+  const client = new MongoClient(uri);
+
   try {
     // Connect to the MongoDB Atlas cluster
     await client.connect();
@@ -31,6 +30,9 @@ export async function getMessages(): Promise<Message[]> {
 }
 
 export async function storeMessage(message: Message) {
+  // Create a new MongoClient
+  const client = new MongoClient(uri);
+  
   try {
     // Connect to the MongoDB Atlas cluster
     await client.connect();
