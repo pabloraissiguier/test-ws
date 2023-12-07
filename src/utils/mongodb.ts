@@ -1,8 +1,11 @@
+import dotenv from "dotenv";
+dotenv.config({ path: `.env.local`, override: true });
+
 import { Message } from "@/utils/types";
 import { MongoClient } from "mongodb";
 
 // Connection URI for MongoDB Atlas
-const uri = process.env.MONGODB_URI as string;
+const uri = process.env.MONGODB_URI || process.env.NEXT_PUBLIC_MONGODB_URI as string;
 
 export async function getMessages(): Promise<Message[]> {
   // Create a new MongoClient
