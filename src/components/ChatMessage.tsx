@@ -11,12 +11,16 @@ const ChatMessage: React.FC<
 > = ({ message, isYou }) => {
   const isYouClass = isYou ? "self-end" : "";
   return (
-    <div className={`flex items-start mb-4 ${isYouClass}`}>
+    <div className={`flex items-start mb-4 max-w-[70%] ${isYouClass}`}>
       <div>
         <div className="flex items-center mb-1">
           <span className="font-bold mr-2">{message.user}</span>
         </div>
-        <div className="bg-gray-200 rounded-lg p-2">{message.text}</div>
+        <div
+          className={`rounded-lg p-2 ${isYou ? "bg-green-200" : "bg-gray-200"}`}
+        >
+          {message.text}
+        </div>
       </div>
     </div>
   );

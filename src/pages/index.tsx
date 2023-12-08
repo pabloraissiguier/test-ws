@@ -1,78 +1,65 @@
-import { trpc } from "@/utils/ws-trpc";
-
-import { v4 as uuidv4 } from "uuid";
-
-import { Message } from "@/utils/types";
+import { useUserStore } from "@/state/user";
+import { useRouter } from "next/router";
 
 import { useEffect, useState } from "react";
-import ChatMessage from "@/components/ChatMessage";
 
 export default function IndexPage() {
-  const [user, setUser] = useState("");
-  const [message, setMessage] = useState("");
-  const [messageList, setMessageList] = useState<Message[]>([]);
+  const { setUser } = useUserStore();
+  const [userName, setUserName] = useState("");
 
-  const { data, error, isLoading } = trpc.fetchMessages.useQuery();
+  const router = useRouter();
 
   useEffect(() => {
-    if (data) {
-      setMessageList(data);
+    const user = localStorage.getItem("USERNAME");
+    if (user) {
+      setUserName(user);
     }
-  }, [data]);
+  }, []);
 
-  const addMessageToList = (message: Message) => {
-    setMessageList([...messageList, message]);
+  const setChatUser = () => {
+    setUser(userName);
+    localStorage.setItem("USERNAME", userName);
+
+    router.push("/chat");
   };
-
-  const addMessage = trpc.sendMessage.useMutation();
-
-  trpc.onSend.useSubscription(undefined, {
-    onData(message) {
-      if (message.user !== user) {
-        addMessageToList(message);
-      }
-    },
-    onError(err) {
-      console.error("Subscription error:", err);
-    },
-  });
-
-  const send = () => {
-    const messageObj = {
-      id: uuidv4(),
-      user,
-      text: message,
-    };
-
-    addMessageToList(messageObj);
-
-    addMessage.mutateAsync(messageObj);
-  };
-
-  if (error) return <div>{error.message}</div>;
-
-  if (isLoading) return <div>Loading...</div>;
 
   return (
-    <div>
-      <input type="text" onChange={(evt) => setUser(evt.target.value)} />
-
-      <div className="flex flex-col max-w-[300px]">
-        {messageList.map((message) => (
-          <ChatMessage
-            key={message.id}
-            isYou={message.user === user}
-            message={message}
+    <div className="h-full flex justify-center">
+      <div className="pt-10">
+        <div className="sm:mx-auto sm:w-full sm:max-w-sm">
+          <img
+            className="mx-auto h-[200px]"
+            src="https://i.giphy.com/7NoNw4pMNTvgc.webp"
+            alt="Your Company"
           />
-        ))}
+          <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
+            Welcome to the chat
+          </h2>
+        </div>
+
+        <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+          <label
+            htmlFor="email"
+            className="block text-sm font-medium leading-6 text-gray-900"
+          >
+            Your user name
+          </label>
+          <div className="mt-2">
+            <input
+              className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 px-2"
+              value={userName}
+              onChange={(evt) => setUserName(evt.target.value)}
+            />
+          </div>
+        </div>
+
+        <button
+          onClick={setChatUser}
+          className="px-4 py-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600 w-full mt-4"
+        >
+          Enter
+        </button>
       </div>
-      <input
-        type="text"
-        name=""
-        id=""
-        onChange={(evt) => setMessage(evt.target.value)}
-      />
-      <button onClick={send}>send message</button>
     </div>
   );
 }
