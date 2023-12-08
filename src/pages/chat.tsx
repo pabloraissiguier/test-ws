@@ -1,17 +1,26 @@
-import { trpc } from "@/utils/ws-trpc";
-import { useUserStore } from "@/state/user";
-
+import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 import { v4 as uuidv4 } from "uuid";
 
+import { trpc } from "@/utils/ws-trpc";
 import { Message } from "@/utils/types";
 
-import { useEffect, useState } from "react";
+import { useUserStore } from "@/state/user";
+
 import ChatMessage from "@/components/ChatMessage";
 import MessageForm from "@/components/MessageForm";
 
 export default function ChatPage() {
   const { user } = useUserStore();
   const [messageList, setMessageList] = useState<Message[]>([]);
+
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!user) {
+      router.push("/");
+    }
+  }, [user]);
 
   const { data, error, isLoading } = trpc.fetchMessages.useQuery();
 
